@@ -1,98 +1,93 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const notificaciones = [
+  { id: 'n1', tipo: 'alerta', mensaje: 'Cambio de sala: 1ro Medio B pasa al Lab de Ciencias en el bloque de las 09:45.' }
+];
 
-export default function HomeScreen() {
+const horarioHoy = [
+  { id: '1', horario: '08:00 - 09:30', asignatura: 'Matemática', curso: '1ro Medio B', sala: 'Sala 12', alumnos: 35, estado: 'normal' },
+  { id: '2', horario: '09:45 - 11:15', asignatura: 'Matemática', curso: '1ro Medio B', sala: 'Lab Ciencias', alumnos: 35, estado: 'cambio_sala' },
+  { id: '3', horario: '11:30 - 13:00', asignatura: 'Atención Apoderados', curso: '-', sala: 'Oficina Depto.', alumnos: 0, estado: 'no_lectiva' },
+];
+
+export default function HorarioScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.saludo}>Hola, Prof. Roberto</Text>
+          <Text style={styles.fecha}>Lunes, 04 de Mayo de 2026</Text>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {notificaciones.length > 0 && (
+          <View style={styles.alertaContainer}>
+            <Text style={styles.alertaTitulo}>⚠️ Alerta de Horario</Text>
+            {notificaciones.map(notif => (
+              <Text key={notif.id} style={styles.alertaMensaje}>{notif.mensaje}</Text>
+            ))}
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>Tus clases de hoy</Text>
+        
+        <View style={styles.horarioContainer}>
+          {horarioHoy.map((clase) => (
+            <View 
+              key={clase.id} 
+              style={[
+                styles.claseCard, 
+                clase.estado === 'cambio_sala' ? styles.claseCardDestacada : null,
+                clase.estado === 'no_lectiva' ? styles.claseCardGris : null
+              ]}
+            >
+              <View style={styles.horaColumna}>
+                <Text style={styles.horaTexto}>{clase.horario.split(' - ')[0]}</Text>
+                <Text style={styles.horaTextoChico}>{clase.horario.split(' - ')[1]}</Text>
+              </View>
+              
+              <View style={styles.infoColumna}>
+                <Text style={styles.asignaturaTexto}>{clase.asignatura}</Text>
+                <Text style={styles.cursoTexto}>{clase.curso}</Text>
+                
+                <View style={styles.detallesFila}>
+                  <Text style={[styles.detalleBadge, clase.estado === 'cambio_sala' ? styles.badgeAlerta : null]}>
+                    📍 {clase.sala}
+                  </Text>
+                  {clase.alumnos > 0 && (
+                    <Text style={styles.detalleBadge}>👥 {clase.alumnos} alumnos</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  safeArea: { flex: 1, backgroundColor: '#F4F7F9' },
+  container: { flex: 1, padding: 20 },
+  header: { marginTop: 10, marginBottom: 20 },
+  saludo: { fontSize: 26, fontWeight: 'bold', color: '#1B2B4B' },
+  fecha: { fontSize: 16, color: '#666', marginTop: 4 },
+  alertaContainer: { backgroundColor: '#FFF3CD', borderLeftWidth: 5, borderLeftColor: '#FFC107', padding: 15, borderRadius: 8, marginBottom: 25 },
+  alertaTitulo: { fontWeight: 'bold', color: '#856404', marginBottom: 5, fontSize: 15 },
+  alertaMensaje: { color: '#856404', fontSize: 14 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B2B4B', marginBottom: 15 },
+  horarioContainer: { paddingBottom: 20 },
+  claseCard: { flexDirection: 'row', backgroundColor: 'white', borderRadius: 12, marginBottom: 15, padding: 15, elevation: 2 },
+  claseCardDestacada: { borderColor: '#FFC107', borderWidth: 1 },
+  claseCardGris: { backgroundColor: '#FAFAFA', borderStyle: 'dashed', borderWidth: 1, borderColor: '#CCC' },
+  horaColumna: { width: 80, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: '#EEE', paddingRight: 15, marginRight: 15 },
+  horaTexto: { fontSize: 16, fontWeight: 'bold', color: '#1B2B4B' },
+  horaTextoChico: { fontSize: 12, color: '#999', marginTop: 2 },
+  infoColumna: { flex: 1, justifyContent: 'center' },
+  asignaturaTexto: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  cursoTexto: { fontSize: 14, color: '#666', marginTop: 2 },
+  detallesFila: { flexDirection: 'row', marginTop: 10, gap: 8, flexWrap: 'wrap' },
+  detalleBadge: { backgroundColor: '#F0F4F8', color: '#555', fontSize: 12, paddingVertical: 4, paddingHorizontal: 8, borderRadius: 6, overflow: 'hidden' },
+  badgeAlerta: { backgroundColor: '#FFF3CD', color: '#856404', fontWeight: 'bold' }
 });
